@@ -34,12 +34,8 @@ pipeline {
 
         stage('Dependency Scan - pip-audit') {
             steps {
-                sh '''
-                sudo apt update
-                sudo apt install -y python3-pip
-                pip3 install pip-audit
-                pip-audit -r requirements.txt
-                '''
+                // No sudo needed, pip-audit already installed on agent
+                sh 'pip-audit -r requirements.txt'
             }
         }
 
