@@ -1,19 +1,4 @@
-# Jenkins
-jenkins.war
-jenkins.log
-.jenkins/
-**/secrets/
-
-# Docker
+venv/
 *.log
-
-# Python
-__pycache__/
-*.pyc
-.env
-
-# Node (if any)
-node_modules/
-
-# OS
-.DS_Store
+*.deb
+.aws/

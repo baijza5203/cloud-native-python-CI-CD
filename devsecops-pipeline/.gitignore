@@ -1,0 +1,19 @@
+# Jenkins
+jenkins.war
+jenkins.log
+.jenkins/
+**/secrets/
+
+# Docker
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.env
+
+# Node (if any)
+node_modules/
+
+# OS
+.DS_Store
