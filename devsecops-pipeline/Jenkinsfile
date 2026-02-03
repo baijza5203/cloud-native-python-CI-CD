@@ -30,7 +30,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t ${IMAGE_NAME}:latest .'
+                sh 'docker build -t $IMAGE_NAME:latest .'
             }
         }
 
@@ -42,7 +42,7 @@ pipeline {
                   aquasec/trivy image \
                   --severity HIGH,CRITICAL \
                   --no-progress \
-                  ${IMAGE_NAME}:latest || true
+                  $IMAGE_NAME:latest || true
                 '''
             }
         }
@@ -54,8 +54,8 @@ pipeline {
                     string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
                 ]) {
                     sh '''
-                    aws ecr get-login-password --region ${AWS_REGION} \
-                    | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+                    aws ecr get-login-password --region $AWS_REGION \
+                    | docker login --username AWS --password-stdin $ECR_REGISTRY
                     '''
                 }
             }
@@ -64,8 +64,8 @@ pipeline {
         stage('Push Image to ECR') {
             steps {
                 sh '''
-                docker tag ${IMAGE_NAME}:latest ${ECR_REGISTRY}/${ECR_REPO}:latest
-                docker push ${ECR_REGISTRY}/${ECR_REPO}:latest
+                docker tag $IMAGE_NAME:latest $ECR_REGISTRY/$ECR_REPO:latest
+                docker push $ECR_REGISTRY/$ECR_REPO:latest
                 '''
             }
         }
