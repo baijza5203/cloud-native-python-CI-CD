@@ -7,6 +7,9 @@ pipeline {
         ECR_REPO = 'python-devsecops-app'
         IMAGE_NAME = 'python-devsecops-app'
         ECR_REGISTRY = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+
+        // 🔑 IMPORTANT CHANGE
+        IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
     stages {
@@ -31,7 +34,9 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $IMAGE_NAME:latest .'
+                sh '''
+                docker build -t $IMAGE_NAME:$IMAGE_TAG .
+                '''
             }
         }
 
@@ -43,7 +48,7 @@ pipeline {
                   aquasec/trivy image \
                   --severity HIGH,CRITICAL \
                   --no-progress \
-                  $IMAGE_NAME:latest || true
+                  $IMAGE_NAME:$IMAGE_TAG || true
                 '''
             }
         }
@@ -69,8 +74,19 @@ pipeline {
         stage('Push Image to ECR') {
             steps {
                 sh '''
-                docker tag $IMAGE_NAME:latest $ECR_REGISTRY/$ECR_REPO:latest
-                docker push $ECR_REGISTRY/$ECR_REPO:latest
+                docker tag $IMAGE_NAME:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
+                docker push $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
+                '''
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                kubectl set image deployment/python-app \
+                python-app=$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
+
+                kubectl rollout status deployment/python-app
                 '''
             }
         }
