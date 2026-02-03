@@ -31,9 +31,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh '''
-                docker build -t $IMAGE_NAME:latest .
-                '''
+                sh 'docker build -t $IMAGE_NAME:latest .'
             }
         }
 
@@ -51,15 +49,16 @@ pipeline {
         }
 
         stage('Login to AWS ECR') {
-            environment {
-                AWS_ACCESS_KEY_ID     = AKIAR67EU2KHDG6HSOIS
-                AWS_SECRET_ACCESS_KEY = 62Q7sQdSyFKUNhklzi+lKwYc3YD1
-            }
             steps {
-                sh '''
-                aws ecr get-login-password --region $AWS_REGION \
-                | docker login --username AWS --password-stdin $ECR_REGISTRY
-                '''
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    sh '''
+                    aws ecr get-login-password --region $AWS_REGION \
+                    | docker login --username AWS --password-stdin $ECR_REGISTRY
+                    '''
+                }
             }
         }
 
